@@ -1,3 +1,10 @@
-Seminar: Fortgeschrittene Programmierkonzepte
+# Seminar: Advanced Programming Concepts
 
-Extensive work done by Justin Graß, Atakan Cubukcu, and Pau Azpeitia Bergós on Constraint Logic Programming, completed on June 21, 2023, evaluated with a grade of 2.0 (German grading scale).
+## Work Details
+
+**Title**: Extensive work on Constraint Logic Programming  
+**Authors**: Justin Graß, Atakan Cubukcu, Pau Azpeitia Bergós  
+**Completion Date**: June 21, 2023  
+**Grade**: 2.0 (German grading scale)
+
+This project explores the field of Constraint Logic Programming, delving into advanced concepts and practical implementations.
