@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medizinische Analyse-Plattform - Konzept</title>
+    <style>
+        /* Grundlayout: Reset und Flexbox für volle Höhe */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #333;
+            background-color: #f0f2f5;
+        }
+
+        /* 1. HEADER (Oben) */
+        header {
+            background-color: #005b96;
+            color: white;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+        .logo { font-weight: bold; font-size: 1.3rem; display: flex; align-items: center; gap: 10px; letter-spacing: 0.5px;}
+        .header-actions { display: flex; gap: 10px; }
+        
+        button { border: none; border-radius: 4px; padding: 8px 16px; cursor: pointer; font-weight: 600; transition: background 0.2s; font-size: 0.9rem;}
+        .btn-s3 { background-color: rgba(255,255,255,0.2); color: white; }
+        .btn-s3:hover { background-color: rgba(255,255,255,0.3); }
+        .btn-export { background-color: #008cba; color: white; } 
+        .btn-export:hover { background-color: #00a1d6; }
+        .btn-run { background-color: #2ecc71; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
+        .btn-run:hover { background-color: #27ae60; }
+
+        /* HAUPTBEREICH */
+        .main-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 60px);
+            overflow: hidden; /* Wichtig für Scroll-Verhalten der Kinder */
+        }
+
+        /* 2. SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background-color: #fff;
+            border-right: 1px solid #e0e0e0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        .section-title {
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            color: #777;
+            margin-bottom: 5px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .draggable-item {
+            background: white;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-left: 4px solid #ccc;
+            border-radius: 6px;
+            cursor: grab;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .item-data { border-left-color: #3498db; }
+        .item-proc { border-left-color: #9b59b6; }
+        .item-ai { border-left-color: #e67e22; }
+        .item-eval { border-left-color: #2ecc71; }
+        .draggable-item:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
+        .icon { font-size: 1.3em;}
+
+        /* 3. CANVAS */
+        .canvas {
+            flex: 1;
+            background-color: #f8f9fa;
+            background-image: 
+                linear-gradient(to right, #eef1f5 1px, transparent 1px),
+                linear-gradient(to bottom, #eef1f5 1px, transparent 1px);
+            background-size: 30px 30px;
+            position: relative;
+            overflow: auto; /* Hier sind die Scrollbalken! */
+        }
+        
+        .node {
+            position: absolute;
+            width: 200px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 0;
+            overflow: hidden;
+            border: 1px solid #d0d7de;
+        }
+        .node-header {
+            background: #f0f2f5;
+            color: #333;
+            padding: 10px 15px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-bottom: 1px solid #d0d7de;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .node-body { padding: 12px 15px; font-size: 0.9rem; color: #555; line-height: 1.4; }
+        
+        .connection {
+            position: absolute;
+            height: 3px;
+            background: #b0b8c1;
+            z-index: 0;
+            transform-origin: 0 0;
+            border-radius: 2px;
+        }
+        .arrow-head {
+            position: absolute;
+            width: 0; height: 0;
+            border-top: 7px solid transparent;
+            border-bottom: 7px solid transparent;
+            border-left: 10px solid #b0b8c1;
+            right: -6px; top: -5.5px;
+        }
+
+        /* 4. PROPERTIES */
+        .properties {
+            width: 320px;
+            background-color: #fff;
+            border-left: 1px solid #e0e0e0;
+            padding: 25px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        .prop-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .prop-group { margin-bottom: 20px; }
+        .prop-group label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 8px; font-weight: 600;}
+        .prop-group input, .prop-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            background-color: #fbfbfc;
+            box-sizing: border-box;
+        }
+        .prop-group input:focus, .prop-group select:focus { outline: 2px solid #005b96; border-color: #005b96; background: #fff;}
+        .help-text { font-size: 0.8rem; color: #888; margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <span>🧬</span> Medizinische Analyse-Plattform
+        </div>
+        <div class="header-actions">
+            <button class="btn-s3">🗂️ Datenquellen verwalten</button>
+            <button class="btn-export">💾 Konfiguration speichern</button>
+            <button class="btn-run">▶ ANALYSE STARTEN</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        
+        <div class="sidebar">
+            <div class="section-title">Verfügbare Analyseschritte</div>
+            <div class="draggable-item item-data"><span class="icon">📂</span> Patientendaten importieren</div>
+            <div class="draggable-item item-proc"><span class="icon">〰️</span> Signalbereinigung / Filter</div>
+            <div class="draggable-item item-ai"><span class="icon">🧠</span> Mustererkennung (KI)</div>
+            <div class="draggable-item item-eval"><span class="icon">📈</span> Validierung & Reporting</div>
+        </div>
+
+        <div class="canvas">
+            <div class="node" style="top: 100px; left: 80px; border-top: 3px solid #3498db;">
+                <div class="node-header"><span class="icon">📂</span> Datenimport</div>
+                <div class="node-body">Quelle: Kohorte_Studie_B (DICOM/CSV)</div>
+            </div>
+
+            <div class="connection" style="top: 145px; left: 282px; width: 80px;">
+                <div class="arrow-head" style="left: 80px;"></div>
+            </div>
+
+            <div class="node" style="top: 100px; left: 380px; border-top: 3px solid #9b59b6;">
+                <div class="node-header"><span class="icon">〰️</span> Signalverarbeitung</div>
+                <div class="node-body">Methode: Rauschunterdrückung (Hochpass)</div>
+            </div>
+
+            <div class="connection" style="top: 145px; left: 582px; width: 80px;">
+                <div class="arrow-head" style="left: 80px;"></div>
+            </div>
+
+            <div class="node" style="top: 100px; left: 680px; border-top: 3px solid #e67e22; box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.3);">
+                <div class="node-header" style="background: #fff3e0; color: #d35400;"><span class="icon">🧠</span> Mustererkennung (KI)</div>
+                <div class="node-body">Modell: Anomalie-Detektor v2</div>
+            </div>
+        </div>
+
+        <div class="properties">
+            <div class="prop-header" style="color: #d35400;">
+                <span class="icon">🧠</span> Schritt konfigurieren
+            </div>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            
+            <div class="prop-group">
+                <label>Anpassungsrate (Learning Rate)</label>
+                <input type="text" value="0.001">
+                <div class="help-text">Wie stark das Modell pro Schritt lernt (niedriger = genauer, aber langsamer).</div>
+            </div>
+            
+            <div class="prop-group">
+                <label>Trainingszyklen</label>
+                <input type="number" value="50">
+                <div class="help-text">Anzahl der kompletten Durchläufe durch die Trainingsdaten.</div>
+            </div>
+
+            <div class="prop-group">
+                <label>Verwendete Eingabedaten</label>
+                <select>
+                    <option selected>Ergebnis aus: Signalverarbeitung</option>
+                    <option>Original Rohdaten (nicht empfohlen)</option>
+                </select>
+            </div>
+
+            <div class="prop-group">
+                <label>Berechnungshardware</label>
+                <select>
+                    <option>Standard Prozessor (CPU)</option>
+                    <option selected>Hochleistung (GPU Beschleunigung)</option>
+                </select>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

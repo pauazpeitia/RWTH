@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: vm_gui_monolith
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      # WICHTIG: Diese Zeile rettet deine React-Dateien vor dem Überschreiben!
+      - /app/frontend/build
+      # Auch Node-Modules schützen, falls du npm Befehle im Container ausführst
+      - /app/frontend/node_modules
+    environment:
+      - DJANGO_SETTINGS_MODULE=vm_gui.settings

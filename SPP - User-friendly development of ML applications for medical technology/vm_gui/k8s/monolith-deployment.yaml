@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spp-monolith
+  labels:
+    app: spp-monolith
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spp-monolith
+  template:
+    metadata:
+      labels:
+        app: spp-monolith
+    spec:
+      imagePullSecrets:
+        - name: vm-pipeline-image-pull-secret
+      containers:
+        - name: spp-monolith
+          image: wima02/spp-monolith:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          command: ["sh", "-c"]
+          args:
+            - |
+              python manage.py collectstatic --noinput &&
+              python manage.py runserver 0.0.0.0:8000

@@ -1,0 +1,3 @@
+[console_scripts]
+hera=hera.__main__:main
+
